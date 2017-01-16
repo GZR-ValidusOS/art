@@ -416,7 +416,7 @@ class WatchDog {
     const char* reason = "dex2oat watch dog thread startup";
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_mutex_init, (&mutex_, nullptr), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_condattr_init, (&condattr_), reason);
-    CHECK_WATCH_DOG_PTHREAD_CALL(pthread_condattr_setclock, (&condattr_, WATCHDOG_CLOCK), reason);
+    CHECK_WATCH_DOG_PTHREAD_CALL(pthread_condattr_setclock, (&condattr_, CLOCK_MONOTONIC), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_cond_init, (&cond_, &condattr_), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_condattr_destroy, (&condattr_), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_attr_init, (&attr_), reason);
@@ -435,6 +435,7 @@ class WatchDog {
 
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_join, (pthread_, nullptr), reason);
 
+    CHECK_WATCH_DOG_PTHREAD_CALL(pthread_condattr_destroy, (&condattr_), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_cond_destroy, (&cond_), reason);
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_mutex_destroy, (&mutex_), reason);
   }
@@ -461,7 +462,7 @@ class WatchDog {
     //       large.
     constexpr int64_t multiplier = kVerifyObjectSupport > kVerifyObjectModeFast ? 100 : 1;
     timespec timeout_ts;
-    InitTimeSpec(true, WATCHDOG_CLOCK, multiplier * kWatchDogTimeoutSeconds * 1000, 0, &timeout_ts);
+    InitTimeSpec(true, CLOCK_MONOTONIC, multiplier * kWatchDogTimeoutSeconds * 1000, 0, &timeout_ts);
     const char* reason = "dex2oat watch dog thread waiting";
     CHECK_WATCH_DOG_PTHREAD_CALL(pthread_mutex_lock, (&mutex_), reason);
     while (!shutting_down_) {
